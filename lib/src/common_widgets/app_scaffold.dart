@@ -45,7 +45,6 @@ class _AppScaffoldState extends State<AppScaffold> {
       _selectedIndex = index;
     });
 
-    // ✅ Solo cambiamos de ruta si está dentro de la barra
     switch (index) {
       case 0:
         Navigator.pushReplacementNamed(context, AppRouter.dashboard);
@@ -65,80 +64,99 @@ class _AppScaffoldState extends State<AppScaffold> {
     }
   }
 
+  Future<bool> _onWillPop() async {
+    // 🔹 Cuando el usuario presiona el botón atrás
+    // volvemos a la pantalla anterior y actualizamos el índice según la ruta
+    if (_selectedIndex != 0) {
+      // Si no estamos en Home → volvemos al Dashboard
+      Navigator.pushReplacementNamed(context, AppRouter.dashboard);
+      setState(() {
+        _selectedIndex = 0;
+      });
+      return false; // Evitamos el pop por defecto
+    }
+    return true; // Si ya estamos en Home, permite salir de la app
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Scaffold(
-          appBar: AppBar(
-            title: Text(
-              widget.title,
-              style: AppTextStyles.screenTitle.copyWith(color: AppColors.black),
-            ),
-            centerTitle: true,
-            elevation: 0,
-            leading: IconButton(
-              icon: const Icon(Icons.menu, color: AppColors.secondary),
-              onPressed: _toggleSidebar,
-            ),
-            flexibleSpace: Container(
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage("assets/img/appbar.png"),
-                  fit: BoxFit.cover,
+    return WillPopScope(
+      onWillPop: _onWillPop, // 🔹 Captura el botón físico “Atrás”
+      child: Stack(
+        children: [
+          Scaffold(
+            appBar: AppBar(
+              title: Text(
+                widget.title,
+                style: AppTextStyles.screenTitle.copyWith(
+                  color: AppColors.black,
                 ),
               ),
-            ),
-          ),
-
-          body: widget.body,
-          floatingActionButton: widget.floatingActionButton,
-
-          bottomNavigationBar: Container(
-            decoration: const BoxDecoration(
-              border: Border(
-                top: BorderSide(
-                  color: Color.fromARGB(255, 113, 108, 108),
-                  width: 1,
-                ),
-              ),
-            ),
-            child: BottomNavigationBar(
-              backgroundColor: AppColors.surface,
+              centerTitle: true,
               elevation: 0,
-              currentIndex: _selectedIndex,
-              onTap: _onNavTapped,
-              type: BottomNavigationBarType.fixed,
-              selectedItemColor:
-                  AppColors.primary, // ✅ Azul para texto seleccionado
-              unselectedItemColor:
-                  AppColors.grey, // ✅ Gris para los no seleccionados
-              selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
-              unselectedLabelStyle: const TextStyle(
-                fontWeight: FontWeight.normal,
+              leading: IconButton(
+                icon: const Icon(Icons.menu, color: AppColors.secondary),
+                onPressed: _toggleSidebar,
               ),
-              items: [
-                _buildNavItem(Icons.home_outlined, "Home", 0),
-                _buildNavItem(Icons.people_outline, "Clientes", 1),
-                _buildNavItem(Icons.bar_chart_outlined, "Estadísticas", 2),
-                _buildNavItem(Icons.person_outline, "Perfil", 3),
-                _buildNavItem(Icons.settings_outlined, "Ajustes", 4),
-              ],
+              flexibleSpace: Container(
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage("assets/img/appbar.png"),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ),
+
+            body: widget.body,
+            floatingActionButton: widget.floatingActionButton,
+
+            bottomNavigationBar: Container(
+              decoration: const BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: Color.fromARGB(255, 113, 108, 108),
+                    width: 1,
+                  ),
+                ),
+              ),
+              child: BottomNavigationBar(
+                backgroundColor: AppColors.surface,
+                elevation: 0,
+                currentIndex: _selectedIndex,
+                onTap: _onNavTapped,
+                type: BottomNavigationBarType.fixed,
+                selectedItemColor: AppColors.primary,
+                unselectedItemColor: AppColors.grey,
+                selectedLabelStyle: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+                unselectedLabelStyle: const TextStyle(
+                  fontWeight: FontWeight.normal,
+                ),
+                items: [
+                  _buildNavItem(Icons.home_outlined, "Home", 0),
+                  _buildNavItem(Icons.people_outline, "Clientes", 1),
+                  _buildNavItem(Icons.bar_chart_outlined, "Estadísticas", 2),
+                  _buildNavItem(Icons.person_outline, "Perfil", 3),
+                  _buildNavItem(Icons.settings_outlined, "Ajustes", 4),
+                ],
+              ),
             ),
           ),
-        ),
 
-        if (_isSidebarOpen) ...[
-          GestureDetector(
-            onTap: _toggleSidebar,
-            child: Container(color: Colors.black54),
-          ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: AppSidebar(onClose: _toggleSidebar),
-          ),
+          if (_isSidebarOpen) ...[
+            GestureDetector(
+              onTap: _toggleSidebar,
+              child: Container(color: Colors.black54),
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: AppSidebar(onClose: _toggleSidebar),
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:crediahorro/src/common_widgets/profile_avatar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -13,10 +14,11 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   String? _savedImagePath;
   String? _tempImagePath;
+  String _username = "";
 
-  final _nameController = TextEditingController();
   final _lastnameController = TextEditingController();
-  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _whatsappController = TextEditingController();
 
   @override
   void initState() {
@@ -26,11 +28,20 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _loadProfileData() async {
     final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('accessToken');
+
+    String username = "";
+    if (token != null) {
+      final decoded = JwtDecoder.decode(token);
+      username = decoded["sub"] ?? "Usuario";
+    }
+
     setState(() {
       _savedImagePath = prefs.getString('profile_image');
-      _nameController.text = prefs.getString('profile_name') ?? '';
+      _username = username;
       _lastnameController.text = prefs.getString('profile_lastname') ?? '';
-      _usernameController.text = prefs.getString('profile_username') ?? '';
+      _emailController.text = prefs.getString('profile_email') ?? '';
+      _whatsappController.text = prefs.getString('profile_whatsapp') ?? '';
     });
   }
 
@@ -51,9 +62,9 @@ class _ProfilePageState extends State<ProfilePage> {
       'profile_image',
       _tempImagePath ?? _savedImagePath ?? '',
     );
-    await prefs.setString('profile_name', _nameController.text);
     await prefs.setString('profile_lastname', _lastnameController.text);
-    await prefs.setString('profile_username', _usernameController.text);
+    await prefs.setString('profile_email', _emailController.text);
+    await prefs.setString('profile_whatsapp', _whatsappController.text);
 
     setState(() {
       _savedImagePath = _tempImagePath ?? _savedImagePath;
@@ -82,7 +93,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 onPressed: () => Navigator.pop(context),
               ),
               const SizedBox(height: 10),
-
               const Center(
                 child: Text(
                   "Editar perfil",
@@ -96,15 +106,12 @@ class _ProfilePageState extends State<ProfilePage> {
               const SizedBox(height: 8),
               const Center(
                 child: Text(
-                  "Toda la información que ingreses en tu perfil se\n"
-                  "mantendrá privada y solo estará disponible para ti",
+                  "Toda la información que ingreses en tu perfil se\nmantendrá privada y solo estará disponible para ti",
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 13, color: Colors.white70),
                 ),
               ),
               const SizedBox(height: 20),
-
-              // Avatar
               Center(
                 child: ProfileAvatar(
                   imagePath: displayImage,
@@ -132,15 +139,20 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 25),
 
               // Campos
-              _buildTextField("Nombre", _nameController),
+              _buildTextField(
+                "Nombre de usuario",
+                TextEditingController(text: _username),
+                readOnly: true,
+              ),
               const SizedBox(height: 15),
               _buildTextField("Apellido", _lastnameController),
               const SizedBox(height: 15),
-              _buildTextField("Nombre de usuario", _usernameController),
+              _buildTextField("Correo electrónico", _emailController),
+              const SizedBox(height: 15),
+              _buildTextField("WhatsApp", _whatsappController),
 
               const SizedBox(height: 30),
 
@@ -173,9 +185,14 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller) {
+  Widget _buildTextField(
+    String label,
+    TextEditingController controller, {
+    bool readOnly = false,
+  }) {
     return TextField(
       controller: controller,
+      readOnly: readOnly,
       style: const TextStyle(color: Colors.white, fontSize: 16),
       decoration: InputDecoration(
         labelText: label,
@@ -183,13 +200,11 @@ class _ProfilePageState extends State<ProfilePage> {
         filled: true,
         fillColor: const Color(0xFF2E2A2A),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.white24),
+        enabledBorder: const OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.white24),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.white),
+        focusedBorder: const OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.white),
         ),
       ),
     );

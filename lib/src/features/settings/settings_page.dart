@@ -13,17 +13,18 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final AuthService _authService = AuthService();
     final List<_SettingItem> items = [
-      _SettingItem(
-        title: "Perfil",
-        icon: Icons.person_outline,
-        onTap: () => Navigator.pushNamed(context, AppRouter.perfil),
-      ),
+      //_SettingItem(
+      //title: "Perfil",
+      //icon: Icons.person_outline,
+      //onTap: () => Navigator.pushNamed(context, AppRouter.perfil),
+      //),
       _SettingItem(
         title: "Notificaciones",
         icon: Icons.notifications_outlined,
         onTap: () {},
       ),
       _SettingItem(title: "Seguridad", icon: Icons.lock_outline, onTap: () {}),
+      _SettingItem(title: "Temas", icon: Icons.palette_outlined, onTap: () {}),
       _SettingItem(
         title: "Cerrar Sesión",
         icon: Icons.logout_outlined,
@@ -42,15 +43,6 @@ class SettingsPage extends StatelessWidget {
       title: "CREDIAHORRO",
       body: Column(
         children: [
-          const SizedBox(height: 20),
-          const AppLogo(size: 80),
-          const SizedBox(height: 10),
-          Text(
-            "Opciones de Configuración",
-            style: AppTextStyles.screenTitle.copyWith(
-              color: AppColors.textPrimary,
-            ),
-          ),
           const SizedBox(height: 20),
           Expanded(
             child: ListView.separated(

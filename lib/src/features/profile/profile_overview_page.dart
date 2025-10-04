@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:crediahorro/src/common_widgets/profile_avatar.dart';
 import 'package:crediahorro/src/common_widgets/app_scaffold.dart';
 import 'package:crediahorro/src/routing/app_router.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class ProfileOverviewPage extends StatefulWidget {
   const ProfileOverviewPage({super.key});
@@ -13,7 +14,8 @@ class ProfileOverviewPage extends StatefulWidget {
 
 class _ProfileOverviewPageState extends State<ProfileOverviewPage> {
   String? _profileImagePath;
-  String _Name = "Usuario";
+  String _username = "Usuario";
+  String _role = "";
 
   @override
   void initState() {
@@ -23,10 +25,20 @@ class _ProfileOverviewPageState extends State<ProfileOverviewPage> {
 
   Future<void> _loadProfileData() async {
     final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('accessToken');
+    String username = "Usuario";
+    String role = "";
+
+    if (token != null) {
+      final decoded = JwtDecoder.decode(token);
+      username = decoded["sub"] ?? "Usuario"; // o "username" según tu backend
+      role = decoded["role"] ?? "";
+    }
+
     setState(() {
       _profileImagePath = prefs.getString('profile_image');
-      final name = prefs.getString('profile_name') ?? "";
-      _Name = "$name".trim().isEmpty ? "Usuario" : "$name";
+      _username = username;
+      _role = role;
     });
   }
 
@@ -39,19 +51,10 @@ class _ProfileOverviewPageState extends State<ProfileOverviewPage> {
         child: Column(
           children: [
             // Avatar y nombre
-            ProfileAvatar(
-              imagePath: _profileImagePath,
-              size: 120,
-              onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRouter.perfil,
-                ).then((_) => _loadProfileData());
-              },
-            ),
+            ProfileAvatar(imagePath: _profileImagePath, size: 120),
             const SizedBox(height: 15),
             Text(
-              "Hola $_Name",
+              "Hola $_username",
               style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -70,26 +73,7 @@ class _ProfileOverviewPageState extends State<ProfileOverviewPage> {
               ),
             ),
             const SizedBox(height: 15),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRouter.perfil,
-                ).then((_) => _loadProfileData());
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue.shade100,
-                foregroundColor: Colors.blue.shade700,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text("Editar perfil"),
-            ),
 
-            const SizedBox(height: 30),
-
-            // Resumen de préstamos
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -113,10 +97,7 @@ class _ProfileOverviewPageState extends State<ProfileOverviewPage> {
                 ),
               ],
             ),
-
             const SizedBox(height: 30),
-
-            // Finalización de préstamos pagados
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(

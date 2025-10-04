@@ -116,7 +116,6 @@ class LoansContent extends StatelessWidget {
                   onSelected: (value) async {
                     switch (value) {
                       case "verCuotas":
-                        Navigator.pop(context);
                         Navigator.pushNamed(
                           context,
                           AppRouter.cuotas,
@@ -124,7 +123,6 @@ class LoansContent extends StatelessWidget {
                         );
                         break;
                       case "editarPrestamo":
-                        Navigator.pop(context);
                         final result = await Navigator.push(
                           context,
                           MaterialPageRoute(

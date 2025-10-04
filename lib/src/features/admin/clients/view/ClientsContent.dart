@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:crediahorro/src/constants/app_colors.dart';
 import 'package:crediahorro/src/features/admin/clients/models/cliente.dart';
 import 'package:crediahorro/src/routing/app_router.dart';
+import 'package:flutter/services.dart';
 
 class ClientsContent extends StatelessWidget {
   final TextEditingController searchController = TextEditingController();
@@ -99,7 +100,6 @@ class ClientsContent extends StatelessWidget {
           onSelected: (value) async {
             switch (value) {
               case "editar":
-                Navigator.pop(context);
                 final result = await Navigator.pushNamed(
                   context,
                   AppRouter.clienteEdit,
@@ -110,7 +110,6 @@ class ClientsContent extends StatelessWidget {
                 }
                 break;
               case "prestamos":
-                Navigator.pop(context);
                 Navigator.pushNamed(
                   context,
                   AppRouter.prestamos,
@@ -249,6 +248,8 @@ class ClientsContent extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 15),
+
+                // --- Usuario ---
                 Row(
                   children: [
                     CircleAvatar(
@@ -266,9 +267,27 @@ class ClientsContent extends StatelessWidget {
                         ),
                       ),
                     ),
+                    IconButton(
+                      icon: const Icon(Icons.copy, color: Colors.blueAccent),
+                      tooltip: "Copiar usuario",
+                      onPressed: () async {
+                        await Clipboard.setData(
+                          ClipboardData(text: cliente.username ?? ''),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Usuario copiado al portapapeles'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
+
                 const SizedBox(height: 12),
+
+                // --- Contraseña ---
                 Row(
                   children: [
                     CircleAvatar(
@@ -286,9 +305,27 @@ class ClientsContent extends StatelessWidget {
                         ),
                       ),
                     ),
+                    IconButton(
+                      icon: const Icon(Icons.copy, color: Colors.green),
+                      tooltip: "Copiar contraseña",
+                      onPressed: () async {
+                        await Clipboard.setData(
+                          ClipboardData(text: cliente.passwordTemporal ?? ''),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Contraseña copiada al portapapeles'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
+
                 const SizedBox(height: 20),
+
+                // --- Botón cerrar ---
                 Align(
                   alignment: Alignment.centerRight,
                   child: ElevatedButton.icon(
@@ -326,15 +363,24 @@ Hola ${cliente.nombre}, aquí tienes tus credenciales de acceso:
 🔑 Contraseña: ${cliente.passwordTemporal}
 """;
 
-    const miNumero = "+51928581983"; // tu número fijo
-    final url = Uri.parse(
-      "https://wa.me/$miNumero?text=${Uri.encodeComponent(mensaje)}",
+    // Número al que se enviará (debe incluir el código de país, sin espacios ni +)
+    const miNumero = "51928581983"; // Perú: +51 928581983
+
+    final uri = Uri.parse(
+      "whatsapp://send?phone=$miNumero&text=${Uri.encodeComponent(mensaje)}",
     );
 
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication, // 👈 Esto es esencial
+      );
     } else {
-      throw 'No se pudo abrir WhatsApp';
+      // En caso de que no funcione (por ejemplo, si WhatsApp no está instalado)
+      final fallback = Uri.parse(
+        "https://wa.me/$miNumero?text=${Uri.encodeComponent(mensaje)}",
+      );
+      await launchUrl(fallback, mode: LaunchMode.externalApplication);
     }
   }
 

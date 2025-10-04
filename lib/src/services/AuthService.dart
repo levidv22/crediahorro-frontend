@@ -7,7 +7,8 @@ class AuthService {
   static const String
   _baseUrl = //conecta con los microservicios mediante un api
       //'https://gateway-production-7c45.up.railway.app/auth-service/auth'; //railway/path/controller
-      'http://localhost:4040/auth-service/auth';
+      //'http://localhost:4040/auth-service/auth';
+      'https://gateway-production-e6b2.up.railway.app/auth-service/auth';
 
   // LOGINaccestoken mediante el auth interceptor
   Future<void> login(String username, String password) async {
