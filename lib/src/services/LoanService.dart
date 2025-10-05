@@ -6,8 +6,8 @@ import 'package:http/http.dart' as http;
 class LoanService {
   final String baseUrl =
       //"https://gateway-production-7c45.up.railway.app/admin-service/prestamos";
-      //"http://localhost:4040/admin-service/prestamos";
-      "https://gateway-production-e6b2.up.railway.app/admin-service/prestamos";
+      "http://localhost:4040/admin-service/prestamos";
+  //"https://gateway-production-e6b2.up.railway.app/admin-service/prestamos";
 
   final http.Client _client = AuthInterceptor(http.Client());
 

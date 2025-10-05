@@ -16,6 +16,7 @@ class _ProfileOverviewPageState extends State<ProfileOverviewPage> {
   String? _profileImagePath;
   String _username = "Usuario";
   String _role = "";
+  String _profileName = "";
 
   @override
   void initState() {
@@ -31,7 +32,7 @@ class _ProfileOverviewPageState extends State<ProfileOverviewPage> {
 
     if (token != null) {
       final decoded = JwtDecoder.decode(token);
-      username = decoded["sub"] ?? "Usuario"; // o "username" según tu backend
+      username = decoded["sub"] ?? "Usuario";
       role = decoded["role"] ?? "";
     }
 
@@ -39,6 +40,7 @@ class _ProfileOverviewPageState extends State<ProfileOverviewPage> {
       _profileImagePath = prefs.getString('profile_image');
       _username = username;
       _role = role;
+      _profileName = prefs.getString('profile_name') ?? username;
     });
   }
 
@@ -50,11 +52,19 @@ class _ProfileOverviewPageState extends State<ProfileOverviewPage> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // Avatar y nombre
-            ProfileAvatar(imagePath: _profileImagePath, size: 120),
+            ProfileAvatar(
+              imagePath: _profileImagePath,
+              size: 120,
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRouter.perfil,
+                ).then((_) => _loadProfileData());
+              },
+            ),
             const SizedBox(height: 15),
             Text(
-              "Hola $_username",
+              "Hola $_profileName",
               style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -73,6 +83,23 @@ class _ProfileOverviewPageState extends State<ProfileOverviewPage> {
               ),
             ),
             const SizedBox(height: 15),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRouter.perfil,
+                ).then((_) => _loadProfileData());
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue.shade100,
+                foregroundColor: Colors.blue.shade700,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text("Editar perfil"),
+            ),
+            const SizedBox(height: 30),
 
             Align(
               alignment: Alignment.centerLeft,

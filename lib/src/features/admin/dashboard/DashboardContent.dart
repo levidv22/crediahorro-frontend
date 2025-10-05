@@ -314,6 +314,7 @@ Hola ${cliente.nombre}, aquí tienes tus credenciales de acceso:
   }
 
   /// --- SECCIÓN CLIENTES ---
+  /// --- SECCIÓN CLIENTES ---
   Widget _buildSection(String title, List<Cliente> clientes) {
     return Theme(
       data: Theme.of(context).copyWith(
@@ -330,7 +331,7 @@ Hola ${cliente.nombre}, aquí tienes tus credenciales de acceso:
           builder: (context, setStateSB) {
             bool expanded = true;
             return ExpansionTile(
-              initiallyExpanded: true,
+              initiallyExpanded: false,
               tilePadding: const EdgeInsets.symmetric(horizontal: 12),
               backgroundColor: AppColors.surface,
               collapsedBackgroundColor: AppColors.surface,
@@ -341,27 +342,65 @@ Hola ${cliente.nombre}, aquí tienes tus credenciales de acceso:
                 });
               },
               title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const SizedBox(width: 6),
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                      color: AppColors.textPrimary,
-                    ),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.folder_special_outlined,
+                        color: AppColors.surface,
+                        size: 22,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                          color: AppColors.black,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 3,
+                              offset: const Offset(1, 1),
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          "${clientes.length}",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   AnimatedRotation(
                     turns: expanded ? 0.25 : 0.0,
                     duration: const Duration(milliseconds: 250),
                     child: const Icon(
-                      Icons.arrow_right,
-                      size: 22,
-                      color: Colors.black,
+                      Icons.keyboard_arrow_right_rounded,
+                      color: Color(0xFF1565C0),
+                      size: 26,
                     ),
                   ),
                 ],
               ),
+
               children: clientes.isEmpty
                   ? [
                       Padding(

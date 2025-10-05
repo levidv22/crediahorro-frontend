@@ -9,63 +9,215 @@ import 'package:crediahorro/src/features/admin/clients/models/cliente.dart';
 import 'package:crediahorro/src/routing/app_router.dart';
 import 'package:flutter/services.dart';
 
-class ClientsContent extends StatelessWidget {
-  final TextEditingController searchController = TextEditingController();
+class ClientsContent extends StatefulWidget {
+  const ClientsContent({super.key});
 
-  ClientsContent({super.key});
+  @override
+  State<ClientsContent> createState() => _ClientsContentState();
+}
+
+class _ClientsContentState extends State<ClientsContent> {
+  final TextEditingController searchController = TextEditingController();
+  bool showFilterMenu = false;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Stack(
       children: [
-        const SizedBox(height: 20),
-        // Buscador
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: TextField(
-            controller: searchController,
-            onChanged: (value) =>
-                context.read<ClientsBloc>().add(SearchClients(value)),
-            decoration: InputDecoration(
-              hintText: "Buscar cliente...",
-              prefixIcon: const Icon(Icons.search),
-              filled: true,
-              fillColor: AppColors.surface,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+        Column(
+          children: [
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextField(
+                controller: searchController,
+                onChanged: (value) =>
+                    context.read<ClientsBloc>().add(SearchClients(value)),
+                decoration: InputDecoration(
+                  hintText: "Buscar cliente...",
+                  prefixIcon: const Icon(Icons.search_outlined),
+                  filled: true,
+                  fillColor: AppColors.surface,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.only(top: 10, right: 20),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      showFilterMenu = !showFilterMenu;
+                    });
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.white,
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.filter_list_outlined,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          "Filtros",
+                          style: TextStyle(
+                            color: AppColors.primary.withOpacity(0.9),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        Icon(
+                          showFilterMenu
+                              ? Icons.arrow_drop_up
+                              : Icons.arrow_drop_down,
+                          color: AppColors.primary,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            // 📋 Lista de clientes
+            Expanded(
+              child: BlocBuilder<ClientsBloc, ClientsState>(
+                builder: (context, state) {
+                  if (state is ClientsLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state is ClientsError) {
+                    return Center(child: Text(state.message));
+                  } else if (state is ClientsLoaded) {
+                    if (state.filteredClientes.isEmpty) {
+                      return _emptyList();
+                    }
+                    return ListView.builder(
+                      padding: const EdgeInsets.all(12),
+                      itemCount: state.filteredClientes.length,
+                      itemBuilder: (_, index) {
+                        final cliente = state.filteredClientes[index];
+                        return _clienteTile(context, cliente);
+                      },
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          ],
+        ),
+
+        // 🌟 Menú flotante elegante (Dropdown personalizado)
+        if (showFilterMenu)
+          Positioned(
+            top: 130,
+            right: 25,
+            child: Material(
+              elevation: 10,
+              color: Colors.transparent,
+              child: Container(
+                width: 240,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.15),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _filterOption(
+                      context,
+                      icon: Icons.sort_by_alpha_outlined,
+                      text: "Nombre (A-Z)",
+                      onTap: () => _applyFilter(context, SortType.nameAsc),
+                    ),
+                    _filterOption(
+                      context,
+                      icon: Icons.sort_by_alpha_outlined,
+                      text: "Nombre (Z-A)",
+                      onTap: () => _applyFilter(context, SortType.nameDesc),
+                    ),
+                    _divider(),
+                    _filterOption(
+                      context,
+                      icon: Icons.calendar_month_outlined,
+                      text: "Fecha (antiguos primero)",
+                      onTap: () => _applyFilter(context, SortType.dateAsc),
+                    ),
+                    _filterOption(
+                      context,
+                      icon: Icons.calendar_month_outlined,
+                      text: "Fecha (nuevos primero)",
+                      onTap: () => _applyFilter(context, SortType.dateDesc),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-        const SizedBox(height: 20),
-
-        // Lista de clientes
-        Expanded(
-          child: BlocBuilder<ClientsBloc, ClientsState>(
-            builder: (context, state) {
-              if (state is ClientsLoading) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (state is ClientsError) {
-                return Center(child: Text(state.message));
-              } else if (state is ClientsLoaded) {
-                if (state.filteredClientes.isEmpty) {
-                  return _emptyList();
-                }
-                return ListView.builder(
-                  padding: const EdgeInsets.all(12),
-                  itemCount: state.filteredClientes.length,
-                  itemBuilder: (_, index) {
-                    final cliente = state.filteredClientes[index];
-                    return _clienteTile(context, cliente);
-                  },
-                );
-              }
-              return const SizedBox.shrink();
-            },
-          ),
-        ),
       ],
     );
+  }
+
+  Widget _filterOption(
+    BuildContext context, {
+    required IconData icon,
+    required String text,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: () {
+        onTap();
+        setState(() => showFilterMenu = false);
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        child: Row(
+          children: [
+            Icon(icon, color: AppColors.primary, size: 20),
+            const SizedBox(width: 10),
+            Expanded(child: Text(text, style: const TextStyle(fontSize: 14.5))),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _divider() =>
+      Container(height: 1, width: double.infinity, color: Colors.grey.shade200);
+
+  void _applyFilter(BuildContext context, SortType type) {
+    context.read<ClientsBloc>().add(SortClients(type));
   }
 
   Widget _clienteTile(BuildContext context, Cliente cliente) {

@@ -13,11 +13,11 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final AuthService _authService = AuthService();
     final List<_SettingItem> items = [
-      //_SettingItem(
-      //title: "Perfil",
-      //icon: Icons.person_outline,
-      //onTap: () => Navigator.pushNamed(context, AppRouter.perfil),
-      //),
+      _SettingItem(
+        title: "Perfil",
+        icon: Icons.person_outline,
+        onTap: () => Navigator.pushNamed(context, AppRouter.perfil),
+      ),
       _SettingItem(
         title: "Notificaciones",
         icon: Icons.notifications_outlined,

@@ -48,6 +48,7 @@ class CuotasClienteContent extends StatelessWidget {
           itemCount: state.cuotas.length,
           itemBuilder: (context, index) {
             final cuota = state.cuotas[index];
+
             return Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),

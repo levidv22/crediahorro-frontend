@@ -4,6 +4,7 @@ import 'package:crediahorro/src/features/admin/loans/view/bloc/LoansEvent.dart';
 import 'package:crediahorro/src/routing/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:crediahorro/src/constants/app_colors.dart';
 import 'package:crediahorro/src/services/ClienteService.dart';
 import 'package:crediahorro/src/common_widgets/app_scaffold.dart';
 
@@ -32,10 +33,10 @@ class LoansPage extends StatelessWidget {
                 }
               },
               backgroundColor: Colors.white,
-              icon: const Icon(Icons.add, color: Colors.black),
+              icon: const Icon(Icons.add, color: AppColors.primary),
               label: const Text(
                 "Agregar",
-                style: TextStyle(color: Colors.black),
+                style: TextStyle(color: AppColors.primary),
               ),
             ),
           );

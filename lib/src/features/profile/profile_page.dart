@@ -15,10 +15,10 @@ class _ProfilePageState extends State<ProfilePage> {
   String? _savedImagePath;
   String? _tempImagePath;
   String _username = "";
+  String _email = "";
+  String _whatsapp = "";
 
-  final _lastnameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _whatsappController = TextEditingController();
+  final _profileNameController = TextEditingController();
 
   @override
   void initState() {
@@ -31,17 +31,22 @@ class _ProfilePageState extends State<ProfilePage> {
     final token = prefs.getString('accessToken');
 
     String username = "";
+    String email = "";
+    String whatsapp = "";
+
     if (token != null) {
       final decoded = JwtDecoder.decode(token);
       username = decoded["sub"] ?? "Usuario";
+      email = decoded["email"] ?? "No disponible";
+      whatsapp = decoded["whatsapp"] ?? "No disponible";
     }
 
     setState(() {
       _savedImagePath = prefs.getString('profile_image');
       _username = username;
-      _lastnameController.text = prefs.getString('profile_lastname') ?? '';
-      _emailController.text = prefs.getString('profile_email') ?? '';
-      _whatsappController.text = prefs.getString('profile_whatsapp') ?? '';
+      _email = email;
+      _whatsapp = whatsapp;
+      _profileNameController.text = prefs.getString('profile_name') ?? '';
     });
   }
 
@@ -62,9 +67,7 @@ class _ProfilePageState extends State<ProfilePage> {
       'profile_image',
       _tempImagePath ?? _savedImagePath ?? '',
     );
-    await prefs.setString('profile_lastname', _lastnameController.text);
-    await prefs.setString('profile_email', _emailController.text);
-    await prefs.setString('profile_whatsapp', _whatsappController.text);
+    await prefs.setString('profile_name', _profileNameController.text);
 
     setState(() {
       _savedImagePath = _tempImagePath ?? _savedImagePath;
@@ -140,23 +143,27 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
               const SizedBox(height: 25),
-
-              // Campos
+              _buildTextField("Nombre de perfil", _profileNameController),
+              const SizedBox(height: 15),
               _buildTextField(
                 "Nombre de usuario",
                 TextEditingController(text: _username),
                 readOnly: true,
               ),
               const SizedBox(height: 15),
-              _buildTextField("Apellido", _lastnameController),
+              _buildTextField(
+                "Correo Electrónico",
+                TextEditingController(text: _email),
+                readOnly: true,
+              ),
               const SizedBox(height: 15),
-              _buildTextField("Correo electrónico", _emailController),
-              const SizedBox(height: 15),
-              _buildTextField("WhatsApp", _whatsappController),
+              _buildTextField(
+                "Whatsapp",
+                TextEditingController(text: _whatsapp),
+                readOnly: true,
+              ),
 
               const SizedBox(height: 30),
-
-              // Botón guardar
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(

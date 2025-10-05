@@ -4,8 +4,8 @@ import 'package:crediahorro/src/services/AuthInterceptor.dart';
 import 'package:http/http.dart' as http;
 
 class UsuariosService {
-  final String baseUrl = //"http://localhost:4040/admin-service/usuarios";
-      "https://gateway-production-e6b2.up.railway.app/admin-service/usuarios";
+  final String baseUrl = "http://localhost:4040/admin-service/usuarios";
+  //"https://gateway-production-e6b2.up.railway.app/admin-service/usuarios";
   final http.Client _client = AuthInterceptor(http.Client());
 
   /// Obtener préstamos del cliente autenticado

@@ -177,12 +177,90 @@ class CuotasContent extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               children: [
                 Card(
-                  color: Colors.indigo.shade50,
-                  child: ListTile(
-                    title: Text(
-                      "Tipo de Cuota: ${state.data.tipoCuota ?? "-"}",
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  shadowColor: Colors.indigo.withOpacity(0.2),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.indigo.shade50,
+                          Colors.indigo.shade100.withOpacity(0.3),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    subtitle: Text("Cuotas pendientes: $cuotasPendientes"),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // Ícono decorativo a la izquierda
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.indigo.shade100,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.payments_outlined,
+                              color: Colors.indigo,
+                              size: 28,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+
+                          // Texto principal
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Tipo de Cuota",
+                                  style: TextStyle(
+                                    color: Colors.indigo.shade700,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  state.data.tipoCuota ?? "-",
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.schedule_outlined,
+                                      color: Colors.grey,
+                                      size: 18,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      "Cuotas pendientes: $cuotasPendientes",
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -236,31 +314,123 @@ class CuotasContent extends StatelessWidget {
                           borderRadius: BorderRadius.circular(15),
                         ),
                         elevation: 8,
-                        onSelected: (value) {
+                        onSelected: (value) async {
+                          Future<bool> _mostrarConfirmacion(
+                            BuildContext context,
+                            String titulo,
+                            String mensaje,
+                            Color color,
+                          ) async {
+                            return await showDialog<bool>(
+                                  context: context,
+                                  builder: (_) => AlertDialog(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    title: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.warning_amber_rounded,
+                                          color: color,
+                                          size: 30,
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Text(
+                                          titulo,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: color,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    content: Text(
+                                      mensaje,
+                                      style: const TextStyle(fontSize: 15),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        child: const Text(
+                                          "Cancelar",
+                                          style: TextStyle(color: Colors.grey),
+                                        ),
+                                        onPressed: () =>
+                                            Navigator.pop(context, false),
+                                      ),
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: color,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                          ),
+                                        ),
+                                        onPressed: () =>
+                                            Navigator.pop(context, true),
+                                        child: const Text(
+                                          "Confirmar",
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ) ??
+                                false;
+                          }
+
                           switch (value) {
                             case "pagar":
                               if (_esPagarHabilitado(cuotas, i)) {
+                                final confirmar = await _mostrarConfirmacion(
+                                  context,
+                                  "Confirmar Pago",
+                                  "¿Estás seguro de que deseas marcar esta cuota como pagada?",
+                                  Colors.green,
+                                );
+                                if (confirmar) {
+                                  context.read<CuotasBloc>().add(
+                                    PagarCuota(c.id),
+                                  );
+                                  context.read<CuotasBloc>().add(
+                                    RefreshCuotas(prestamoId),
+                                  );
+                                }
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      "No puedes pagar esta cuota aún.",
+                                    ),
+                                    backgroundColor: Colors.orange,
+                                  ),
+                                );
+                              }
+                              break;
+
+                            case "nopagar":
+                              final confirmar = await _mostrarConfirmacion(
+                                context,
+                                "Confirmar Acción",
+                                "¿Deseas marcar esta cuota como NO PAGADA?",
+                                Colors.redAccent,
+                              );
+                              if (confirmar) {
                                 context.read<CuotasBloc>().add(
-                                  PagarCuota(c.id),
+                                  NoPagarCuota(c.id),
                                 );
                                 context.read<CuotasBloc>().add(
                                   RefreshCuotas(prestamoId),
                                 );
                               }
                               break;
-                            case "nopagar":
-                              context.read<CuotasBloc>().add(
-                                NoPagarCuota(c.id),
-                              );
-                              context.read<CuotasBloc>().add(
-                                RefreshCuotas(prestamoId),
-                              );
-                              break;
+
                             case "parcial":
                               _mostrarDialogoPagoParcial(context, c);
                               break;
                           }
                         },
+
                         itemBuilder: (context) => [
                           if (c.estado == "PENDIENTE") ...[
                             PopupMenuItem(
@@ -355,15 +525,88 @@ class CuotasContent extends StatelessWidget {
                 }),
                 const Divider(),
                 Card(
-                  color: Colors.indigo.shade50,
-                  child: ListTile(
-                    title: const Text("Resumen"),
-                    subtitle: Column(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  shadowColor: Colors.indigo.withOpacity(0.2),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.indigo.shade50,
+                          Colors.indigo.shade100.withOpacity(0.3),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Total a pagar: ${_formatCurrency(totalAPagar)}"),
-                        Text("Total pagado: ${_formatCurrency(totalPagado)}"),
-                        Text("Falta pagar: ${_formatCurrency(faltaPagar)}"),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.indigo.shade100,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.analytics_outlined,
+                                color: Colors.indigo,
+                                size: 26,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            const Text(
+                              "Resumen",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.indigo,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.8),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildResumenRow(
+                                icon: Icons.attach_money_outlined,
+                                label: "Total a pagar:",
+                                value: _formatCurrency(totalAPagar),
+                                color: Colors.indigo,
+                              ),
+                              const SizedBox(height: 8),
+                              _buildResumenRow(
+                                icon: Icons.payments_outlined,
+                                label: "Total pagado:",
+                                value: _formatCurrency(totalPagado),
+                                color: Colors.green,
+                              ),
+                              const SizedBox(height: 8),
+                              _buildResumenRow(
+                                icon: Icons.warning_amber_outlined,
+                                label: "Falta pagar:",
+                                value: _formatCurrency(faltaPagar),
+                                color: Colors.redAccent,
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -374,6 +617,37 @@ class CuotasContent extends StatelessWidget {
         }
         return const SizedBox();
       },
+    );
+  }
+
+  Widget _buildResumenRow({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Row(
+      children: [
+        Icon(icon, color: color, size: 22),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: color,
+            fontSize: 15,
+          ),
+        ),
+      ],
     );
   }
 }
