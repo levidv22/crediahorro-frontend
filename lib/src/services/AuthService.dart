@@ -70,18 +70,13 @@ class AuthService {
     }
   }
 
-  // VALIDAR TOKEN
-  Future<bool> validateToken() async {
+  Future<bool> isTokenValid() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('accessToken');
-    if (token == null) return false;
-
-    final response = await http.post(
-      Uri.parse('$_baseUrl/jwt'),
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
-    );
-
-    return response.statusCode == 200;
+    if (token == null || JwtDecoder.isExpired(token)) {
+      return false;
+    }
+    return true;
   }
 
   // OBTENER TOKEN
@@ -93,6 +88,7 @@ class AuthService {
   // LOGOUT
   Future<void> logout() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.remove('accessToken');
+    await prefs.remove('accessToken');
+    await prefs.remove('role');
   }
 }
