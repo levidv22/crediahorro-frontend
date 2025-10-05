@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:crediahorro/src/common_widgets/profile_avatar.dart';
-import 'package:crediahorro/src/common_widgets/app_scaffold.dart';
 import 'package:crediahorro/src/routing/app_router.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:crediahorro/src/common_widgets/role_scaffold_builder.dart';
 
 class ProfileOverviewPage extends StatefulWidget {
   const ProfileOverviewPage({super.key});
@@ -46,8 +46,10 @@ class _ProfileOverviewPageState extends State<ProfileOverviewPage> {
 
   @override
   Widget build(BuildContext context) {
-    return AppScaffold(
+    return buildRoleBasedScaffold(
+      role: _role,
       title: "CREDIAHORRO",
+      viewName: "profile",
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -100,7 +102,6 @@ class _ProfileOverviewPageState extends State<ProfileOverviewPage> {
               child: const Text("Editar perfil"),
             ),
             const SizedBox(height: 30),
-
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -124,57 +125,9 @@ class _ProfileOverviewPageState extends State<ProfileOverviewPage> {
                 ),
               ],
             ),
-            const SizedBox(height: 30),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Finalización de préstamos pagados",
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade800,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    height: 120,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: List.generate(6, (index) {
-                        final height = [
-                          60.0,
-                          100.0,
-                          30.0,
-                          80.0,
-                          50.0,
-                          95.0,
-                        ][index];
-                        return Container(
-                          width: 20,
-                          height: height,
-                          decoration: BoxDecoration(
-                            color: Colors.blue.shade400,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                        );
-                      }),
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ],
         ),
       ),
-      initialIndex: 3,
     );
   }
 }

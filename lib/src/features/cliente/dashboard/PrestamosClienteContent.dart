@@ -222,6 +222,24 @@ class PrestamosClienteContent extends StatelessWidget {
             _buildSection("Próximos", state.proximos, context),
             _buildSection("Anteriores", state.anteriores, context),
             _buildSection("Pagados", state.pagados, context),
+            const SizedBox(height: 25),
+            Center(
+              child: GestureDetector(
+                onTap: () => Navigator.pushNamed(
+                  context,
+                  AppRouter.prestamosclienteslista,
+                ),
+                child: const Text(
+                  "Verifique todos los prestamos",
+                  style: TextStyle(
+                    color: AppColors.secondary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ),
             const SizedBox(height: 20),
           ],
         );

@@ -10,6 +10,7 @@ import 'package:crediahorro/src/features/admin/loans/edit/LoanEditPage.dart';
 import 'package:crediahorro/src/features/admin/loans/view/LoansPage.dart';
 import 'package:crediahorro/src/features/cliente/cuotas/CuotasClientePage.dart';
 import 'package:crediahorro/src/features/cliente/dashboard/PrestamosClientePage.dart';
+import 'package:crediahorro/src/features/cliente/prestamos/PrestamosClienteListaPage.dart';
 import 'package:crediahorro/src/features/profile/profile_overview_page.dart';
 import 'package:crediahorro/src/features/profile/profile_page.dart';
 import 'package:crediahorro/src/features/admin/reports/reports_page.dart';
@@ -32,6 +33,7 @@ class AppRouter {
   static const String perfil = '/perfil';
   static const String perfiloverview = '/perfiloverview';
   static const String prestamosclientes = '/prestamosclientes';
+  static const String prestamosclienteslista = '/prestamosclienteslista';
   static const String cuotasclientes = '/cuotasclientes';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -84,6 +86,10 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const ProfileOverviewPage());
       case prestamosclientes:
         return MaterialPageRoute(builder: (_) => const PrestamosClientePage());
+      case prestamosclienteslista:
+        return MaterialPageRoute(
+          builder: (_) => const PrestamosClienteListaPage(),
+        );
       case cuotasclientes:
         final prestamoId = settings.arguments as int;
         return MaterialPageRoute(

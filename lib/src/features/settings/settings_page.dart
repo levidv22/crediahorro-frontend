@@ -1,13 +1,35 @@
-import 'package:crediahorro/src/common_widgets/app_scaffold.dart';
-import 'package:crediahorro/src/services/AuthService.dart';
 import 'package:flutter/material.dart';
+import 'package:crediahorro/src/services/AuthService.dart';
 import 'package:crediahorro/src/constants/app_colors.dart';
-import 'package:crediahorro/src/constants/app_text_styles.dart';
-import 'package:crediahorro/src/common_widgets/app_logo.dart';
 import 'package:crediahorro/src/routing/app_router.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:crediahorro/src/common_widgets/role_scaffold_builder.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  String _role = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRole();
+  }
+
+  Future<void> _loadRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('accessToken');
+    if (token != null) {
+      final decoded = JwtDecoder.decode(token);
+      setState(() => _role = decoded["role"] ?? "");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,44 +51,38 @@ class SettingsPage extends StatelessWidget {
         title: "Cerrar Sesión",
         icon: Icons.logout_outlined,
         onTap: () async {
-          await _authService.logout(); // limpia el token
+          await _authService.logout();
           Navigator.pushNamedAndRemoveUntil(
             context,
             AppRouter.login,
-            (route) => false, // elimina todas las rutas anteriores
+            (route) => false,
           );
         },
       ),
     ];
 
-    return AppScaffold(
+    return buildRoleBasedScaffold(
+      role: _role,
       title: "CREDIAHORRO",
-      body: Column(
-        children: [
-          const SizedBox(height: 20),
-          Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: items.length,
-              itemBuilder: (_, index) {
-                final item = items[index];
-                return ListTile(
-                  leading: Icon(item.icon, color: AppColors.primary),
-                  title: Text(item.title),
-                  trailing: const Icon(
-                    Icons.arrow_forward_ios,
-                    size: 18,
-                    color: AppColors.textSecondary,
-                  ),
-                  onTap: item.onTap,
-                );
-              },
-              separatorBuilder: (_, _) => const Divider(),
+      viewName: "settings",
+      body: ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: items.length,
+        itemBuilder: (_, index) {
+          final item = items[index];
+          return ListTile(
+            leading: Icon(item.icon, color: AppColors.primary),
+            title: Text(item.title),
+            trailing: const Icon(
+              Icons.arrow_forward_ios,
+              size: 18,
+              color: AppColors.textSecondary,
             ),
-          ),
-        ],
+            onTap: item.onTap,
+          );
+        },
+        separatorBuilder: (_, __) => const Divider(),
       ),
-      initialIndex: 4,
     );
   }
 }
@@ -75,6 +91,5 @@ class _SettingItem {
   final String title;
   final IconData icon;
   final VoidCallback onTap;
-
   _SettingItem({required this.title, required this.icon, required this.onTap});
 }
