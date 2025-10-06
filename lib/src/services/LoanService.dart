@@ -11,6 +11,19 @@ class LoanService {
 
   final http.Client _client = AuthInterceptor(http.Client());
 
+  // 👇 MÉTODO NUEVO: obtener todos los préstamos
+  Future<List<dynamic>> obtenerTodosLosPrestamos() async {
+    final response = await _client.get(Uri.parse("$baseUrl/all"));
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception(
+        "Error al obtener préstamos (admin): ${response.statusCode}",
+      );
+    }
+  }
+
   Future<Prestamo> getPrestamoById(int id) async {
     final response = await _client.get(Uri.parse("$baseUrl/$id"));
     if (response.statusCode == 200) {

@@ -32,4 +32,24 @@ class UsuariosService {
       throw Exception("Error cargando cuotas: ${response.statusCode}");
     }
   }
+
+  Future<Map<String, int>> contarPrestamosPorEstado() async {
+    final response = await _client.get(Uri.parse("$baseUrl/mis-prestamos"));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      int pagados = 0;
+      int activos = 0;
+
+      for (var e in data) {
+        final estado = (e['estado'] ?? '').toString().toUpperCase();
+        if (estado == 'PAGADO') pagados++;
+        if (estado == 'ACTIVO') activos++;
+      }
+
+      return {"pagados": pagados, "activos": activos};
+    } else {
+      throw Exception("Error al contar préstamos: ${response.statusCode}");
+    }
+  }
 }

@@ -515,24 +515,19 @@ Hola ${cliente.nombre}, aquí tienes tus credenciales de acceso:
 🔑 Contraseña: ${cliente.passwordTemporal}
 """;
 
-    // Número al que se enviará (debe incluir el código de país, sin espacios ni +)
-    const miNumero = "51928581983"; // Perú: +51 928581983
-
+    // URL para abrir WhatsApp sin destinatario, solo con el texto
     final uri = Uri.parse(
-      "whatsapp://send?phone=$miNumero&text=${Uri.encodeComponent(mensaje)}",
+      "https://wa.me/?text=${Uri.encodeComponent(mensaje)}",
     );
 
     if (await canLaunchUrl(uri)) {
       await launchUrl(
         uri,
-        mode: LaunchMode.externalApplication, // 👈 Esto es esencial
+        mode: LaunchMode.externalApplication, // abre WhatsApp
       );
     } else {
-      // En caso de que no funcione (por ejemplo, si WhatsApp no está instalado)
-      final fallback = Uri.parse(
-        "https://wa.me/$miNumero?text=${Uri.encodeComponent(mensaje)}",
-      );
-      await launchUrl(fallback, mode: LaunchMode.externalApplication);
+      // Fallback si no se puede abrir
+      print("No se pudo abrir WhatsApp.");
     }
   }
 
