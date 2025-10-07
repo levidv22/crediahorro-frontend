@@ -1,6 +1,7 @@
 import 'package:crediahorro/src/domain/utils/Resource.dart';
 import 'package:crediahorro/src/features/cliente/cuotas/bloc/CuotasClienteBloc.dart';
 import 'package:crediahorro/src/features/cliente/cuotas/bloc/CuotasClienteState.dart';
+import 'package:crediahorro/src/routing/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -89,7 +90,27 @@ class CuotasClienteContent extends StatelessWidget {
                 ),
                 trailing: cuota.estado == "PAGADO"
                     ? const Icon(Icons.verified, color: Colors.green)
-                    : const Icon(Icons.pending_actions, color: Colors.orange),
+                    : ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.pushNamed(
+                            context,
+                            AppRouter.pagarcuota,
+                            arguments: cuota,
+                          );
+                        },
+                        icon: const Icon(Icons.payment),
+                        label: const Text("Pagar"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
               ),
             );
           },

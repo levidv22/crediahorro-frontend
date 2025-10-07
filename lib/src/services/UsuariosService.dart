@@ -1,11 +1,14 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:crediahorro/src/features/cliente/dashboard/models/prestamos.dart';
 import 'package:crediahorro/src/services/AuthInterceptor.dart';
+import 'package:crediahorro/src/services/AuthService.dart';
 import 'package:http/http.dart' as http;
+import 'package:path/path.dart';
 
 class UsuariosService {
-  final String baseUrl = "http://localhost:4040/admin-service/usuarios";
-  //"https://gateway-production-e6b2.up.railway.app/admin-service/usuarios";
+  final String baseUrl = //"http://localhost:4040/admin-service/usuarios";
+      "https://gateway-production-e6b2.up.railway.app/admin-service/usuarios";
   final http.Client _client = AuthInterceptor(http.Client());
 
   /// Obtener préstamos del cliente autenticado
@@ -50,6 +53,49 @@ class UsuariosService {
       return {"pagados": pagados, "activos": activos};
     } else {
       throw Exception("Error al contar préstamos: ${response.statusCode}");
+    }
+  }
+
+  Future<void> enviarPagoCuota(
+    int cuotaId,
+    String tipoSolicitud,
+    String mensajeCliente,
+    File? comprobante, {
+    double? montoParcial,
+  }) async {
+    final uri = Uri.parse(
+      //"http://localhost:4040/admin-service/usuarios-solicitudes-pago/$cuotaId/enviar",
+      "https://gateway-production-e6b2.up.railway.app/admin-service/usuarios-solicitudes-pago/$cuotaId/enviar",
+    );
+
+    var request = http.MultipartRequest('POST', uri);
+    request.fields['tipoSolicitud'] = tipoSolicitud;
+    request.fields['mensajeCliente'] = mensajeCliente;
+
+    if (montoParcial != null) {
+      request.fields['montoParcial'] = montoParcial.toString();
+    }
+
+    if (comprobante != null) {
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'comprobante',
+          comprobante.path,
+          filename: basename(comprobante.path),
+        ),
+      );
+    }
+
+    final token = await AuthService().getToken();
+    if (token != null) {
+      request.headers['Authorization'] = 'Bearer $token';
+    }
+
+    final response = await request.send();
+
+    if (response.statusCode != 200) {
+      final body = await response.stream.bytesToString();
+      throw Exception("Error al enviar pago (${response.statusCode}): $body");
     }
   }
 }

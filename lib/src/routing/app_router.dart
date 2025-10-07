@@ -1,3 +1,4 @@
+import 'package:crediahorro/src/features/admin/solicitud_pagos/SolicitudesPagoAdminPage.dart';
 import 'package:crediahorro/src/features/auth/login/LoginPage.dart';
 import 'package:crediahorro/src/features/auth/register/RegisterPage.dart';
 import 'package:crediahorro/src/features/admin/clients/create/ClienteFormPage.dart';
@@ -10,7 +11,9 @@ import 'package:crediahorro/src/features/admin/loans/edit/LoanEditPage.dart';
 import 'package:crediahorro/src/features/admin/loans/view/LoansPage.dart';
 import 'package:crediahorro/src/features/cliente/cuotas/CuotasClientePage.dart';
 import 'package:crediahorro/src/features/cliente/dashboard/PrestamosClientePage.dart';
+import 'package:crediahorro/src/features/cliente/dashboard/models/prestamos.dart';
 import 'package:crediahorro/src/features/cliente/prestamos/PrestamosClienteListaPage.dart';
+import 'package:crediahorro/src/features/cliente/solicitud_pago/PagarCuotaPage.dart';
 import 'package:crediahorro/src/features/profile/profile_overview_page.dart';
 import 'package:crediahorro/src/features/profile/profile_page.dart';
 import 'package:crediahorro/src/features/admin/reports/reports_page.dart';
@@ -35,6 +38,8 @@ class AppRouter {
   static const String prestamosclientes = '/prestamosclientes';
   static const String prestamosclienteslista = '/prestamosclienteslista';
   static const String cuotasclientes = '/cuotasclientes';
+  static const String pagarcuota = '/pagarcuota';
+  static const String solicitudpago = '/solicitudpago';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -94,6 +99,13 @@ class AppRouter {
         final prestamoId = settings.arguments as int;
         return MaterialPageRoute(
           builder: (_) => CuotasClientePage(prestamoId: prestamoId),
+        );
+      case pagarcuota:
+        final cuota = settings.arguments as Cuota;
+        return MaterialPageRoute(builder: (_) => PagarCuotaPage(cuota: cuota));
+      case solicitudpago:
+        return MaterialPageRoute(
+          builder: (_) => const SolicitudesPagoAdminPage(),
         );
       default:
         return MaterialPageRoute(

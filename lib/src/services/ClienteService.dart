@@ -6,8 +6,8 @@ import 'package:crediahorro/src/features/admin/clients/models/cliente.dart';
 class ClienteService {
   final String baseUrl =
       //"https://gateway-production-7c45.up.railway.app/admin-service/clientes";
-      "http://localhost:4040/admin-service/clientes";
-  //"https://gateway-production-e6b2.up.railway.app/admin-service/clientes";
+      //"http://localhost:4040/admin-service/clientes";
+      "https://gateway-production-e6b2.up.railway.app/admin-service/clientes";
 
   final http.Client _client = AuthInterceptor(http.Client());
 
