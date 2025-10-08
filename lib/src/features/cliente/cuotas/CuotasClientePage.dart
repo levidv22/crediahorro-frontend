@@ -18,7 +18,7 @@ class CuotasClientePage extends StatelessWidget {
           CuotasClienteBloc(UsuariosService())
             ..add(LoadCuotasCliente(prestamoId)),
       child: AppScaffoldUsuario(
-        title: "Mis Cuotas",
+        title: "CREDIAHORRO",
         body: const CuotasClienteContent(),
       ),
     );

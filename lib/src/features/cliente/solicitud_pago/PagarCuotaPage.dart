@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:crediahorro/src/common_widgets/app_scaffold_usuario.dart';
 import 'package:crediahorro/src/features/cliente/dashboard/models/prestamos.dart';
-import 'package:crediahorro/src/services/UsuariosService.dart';
+import 'package:crediahorro/src/services/SolicitudesPagoClienteService.dart';
 
 class PagarCuotaPage extends StatefulWidget {
   final Cuota cuota;
@@ -37,7 +37,7 @@ class _PagarCuotaPageState extends State<PagarCuotaPage> {
     setState(() => _enviando = true);
 
     try {
-      await UsuariosService().enviarPagoCuota(
+      await SolicitudesPagoClienteService().enviarPagoCuota(
         widget.cuota.id!,
         _tipoSeleccionado,
         _mensajeCtrl.text,
@@ -71,7 +71,7 @@ class _PagarCuotaPageState extends State<PagarCuotaPage> {
     final cuota = widget.cuota;
 
     return AppScaffoldUsuario(
-      title: "Pago de Cuota",
+      title: "CREDIAHORRO",
       body: Container(
         width: double.infinity,
         decoration: BoxDecoration(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:crediahorro/src/services/SolicitudPagoService.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:crediahorro/src/services/SolicitudPagoAdminService.dart';
+import 'package:intl/intl.dart';
 import 'package:crediahorro/src/common_widgets/app_scaffold.dart';
 import 'package:crediahorro/src/constants/app_colors.dart';
 
@@ -13,7 +13,7 @@ class SolicitudesPagoAdminPage extends StatefulWidget {
 }
 
 class _SolicitudesPagoAdminPageState extends State<SolicitudesPagoAdminPage> {
-  final _service = SolicitudPagoService();
+  final _service = SolicitudPagoAdminService();
   bool _cargando = true;
   List<dynamic> _solicitudes = [];
 
@@ -21,6 +21,16 @@ class _SolicitudesPagoAdminPageState extends State<SolicitudesPagoAdminPage> {
   void initState() {
     super.initState();
     _cargarSolicitudes();
+  }
+
+  String _formatearFecha(String? fecha) {
+    if (fecha == null || fecha.isEmpty) return '-';
+    try {
+      final DateTime fechaParseada = DateTime.parse(fecha);
+      return DateFormat('dd MMM yyyy, hh:mm a', 'es_ES').format(fechaParseada);
+    } catch (e) {
+      return fecha;
+    }
   }
 
   Future<void> _cargarSolicitudes() async {
@@ -38,14 +48,147 @@ class _SolicitudesPagoAdminPageState extends State<SolicitudesPagoAdminPage> {
     }
   }
 
-  Future<void> _verComprobante(String url) async {
-    if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No se pudo abrir el comprobante.")),
-      );
-    }
+  void _verComprobante(BuildContext context, String url) {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: Colors.white,
+        elevation: 10,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 🔹 Encabezado elegante
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Icon(Icons.image_rounded, color: Colors.blueAccent, size: 26),
+                  SizedBox(width: 8),
+                  Text(
+                    "Comprobante de Pago",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blueAccent,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+
+              // 🔹 Imagen del comprobante con borde y sombra suave
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.blueAccent.withOpacity(0.2),
+                      width: 2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Image.network(
+                    url,
+                    height: 320,
+                    width: double.infinity,
+                    fit: BoxFit.contain,
+                    loadingBuilder: (context, child, progress) {
+                      if (progress == null) return child;
+                      return const Padding(
+                        padding: EdgeInsets.all(40),
+                        child: CircularProgressIndicator(
+                          color: Colors.blueAccent,
+                        ),
+                      );
+                    },
+                    errorBuilder: (_, __, ___) => const Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.broken_image,
+                            color: Colors.redAccent,
+                            size: 40,
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            "❌ No se pudo cargar el comprobante",
+                            style: TextStyle(color: Colors.redAccent),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // 🔹 Botones: Descargar y Cerrar
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent.withOpacity(0.9),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 10,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    icon: const Icon(Icons.download, color: Colors.white),
+                    label: const Text(
+                      "Descargar",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Descarga iniciada..."),
+                          backgroundColor: Colors.blueAccent,
+                        ),
+                      );
+                    },
+                  ),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.redAccent.withOpacity(0.9),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 10,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    icon: const Icon(Icons.close, color: Colors.white),
+                    label: const Text(
+                      "Cerrar",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _responderSolicitud(int id, bool aceptar) async {
@@ -168,7 +311,7 @@ class _SolicitudesPagoAdminPageState extends State<SolicitudesPagoAdminPage> {
           : _solicitudes.isEmpty
           ? const Center(
               child: Text(
-                "No hay solicitudes pendientes 💤",
+                "No hay solicitudes pendientes",
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.grey,
@@ -223,6 +366,11 @@ class _SolicitudesPagoAdminPageState extends State<SolicitudesPagoAdminPage> {
                           ),
                           const SizedBox(height: 8),
                           _infoRow("Cliente", s['clienteNombre']),
+                          _infoRow(
+                            "Fecha de Solicitud",
+                            _formatearFecha(s['fechaSolicitud']),
+                          ),
+
                           _infoRow("Tipo de solicitud", s['tipoSolicitud']),
                           if (s['tipoSolicitud'] == 'PAGO_PARCIAL')
                             _infoRow(
@@ -234,7 +382,10 @@ class _SolicitudesPagoAdminPageState extends State<SolicitudesPagoAdminPage> {
                             "Monto cuota",
                             "S/ ${s['montoCuota'] ?? '-'}",
                           ),
-                          _infoRow("Fecha pago", s['fechaPago'] ?? "-"),
+                          _infoRow(
+                            "Fecha límite",
+                            _formatearFecha(s['fechaPago']),
+                          ),
                           const SizedBox(height: 8),
                           Text(
                             "Mensaje del cliente:",
@@ -252,7 +403,8 @@ class _SolicitudesPagoAdminPageState extends State<SolicitudesPagoAdminPage> {
                           // Comprobante
                           if (s['comprobanteUrl'] != null)
                             GestureDetector(
-                              onTap: () => _verComprobante(s['comprobanteUrl']),
+                              onTap: () =>
+                                  _verComprobante(context, s['comprobanteUrl']),
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: AppColors.primary.withOpacity(0.08),

@@ -23,6 +23,19 @@ class CuotasClienteContent extends StatelessWidget {
     }
   }
 
+  Color _estadoColor(String estado) {
+    switch (estado) {
+      case "PAGADO":
+        return Colors.green;
+      case "PENDIENTE":
+        return Colors.orange;
+      case "ATRASADO":
+        return Colors.redAccent;
+      default:
+        return Colors.grey;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<CuotasClienteBloc, CuotasClienteState>(
@@ -49,20 +62,28 @@ class CuotasClienteContent extends StatelessWidget {
           itemCount: state.cuotas.length,
           itemBuilder: (context, index) {
             final cuota = state.cuotas[index];
+            final colorEstado = _estadoColor(cuota.estado);
 
-            return Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+            return Container(
+              margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+              decoration: BoxDecoration(
+                color: const Color.fromARGB(255, 233, 241, 246),
+                borderRadius: BorderRadius.circular(16),
               ),
-              margin: const EdgeInsets.symmetric(vertical: 6),
               child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 10,
+                  horizontal: 16,
+                ),
                 leading: CircleAvatar(
-                  backgroundColor: cuota.estado == "PAGADO"
-                      ? Colors.green
-                      : Colors.orange,
+                  radius: 24,
+                  backgroundColor: colorEstado,
                   child: Icon(
-                    cuota.estado == "PAGADO" ? Icons.check : Icons.schedule,
+                    cuota.estado == "PAGADO"
+                        ? Icons.check_circle_outline
+                        : Icons.schedule_outlined,
                     color: Colors.white,
+                    size: 26,
                   ),
                 ),
                 title: Text(
@@ -70,23 +91,64 @@ class CuotasClienteContent extends StatelessWidget {
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
+                    color: Colors.black87,
                   ),
                 ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Fecha a Pagar: ${_formatDate(cuota.fechaPago)}"),
-                    Text("Fecha Pagada: ${_formatDate(cuota.fechaPagada)}"),
-                    Text(
-                      "Estado: ${cuota.estado}",
-                      style: TextStyle(
-                        color: cuota.estado == "PAGADO"
-                            ? Colors.green
-                            : Colors.red,
-                        fontWeight: FontWeight.w600,
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.calendar_today_outlined,
+                            size: 16,
+                            color: Colors.grey,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            "Fecha a pagar: ${_formatDate(cuota.fechaPago)}",
+                            style: const TextStyle(fontSize: 13),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 3),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.event_available_outlined,
+                            size: 16,
+                            color: Colors.grey,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            "Fecha pagada: ${_formatDate(cuota.fechaPagada)}",
+                            style: const TextStyle(fontSize: 13),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.info_outline,
+                            size: 16,
+                            color: Colors.grey,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            "Estado: ${cuota.estado}",
+                            style: TextStyle(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w600,
+                              color: colorEstado,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
                 trailing: cuota.estado == "PAGADO"
                     ? const Icon(Icons.verified, color: Colors.green)
@@ -98,10 +160,14 @@ class CuotasClienteContent extends StatelessWidget {
                             arguments: cuota,
                           );
                         },
-                        icon: const Icon(Icons.payment),
-                        label: const Text("Pagar"),
+                        icon: const Icon(Icons.payment, size: 18),
+                        label: const Text(
+                          "Pagar",
+                          style: TextStyle(fontSize: 13.5),
+                        ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blueAccent,
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 12,
                             vertical: 8,
@@ -109,6 +175,7 @@ class CuotasClienteContent extends StatelessWidget {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
+                          elevation: 3,
                         ),
                       ),
               ),

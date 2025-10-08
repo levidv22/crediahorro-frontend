@@ -12,6 +12,7 @@ import 'package:crediahorro/src/features/admin/loans/view/LoansPage.dart';
 import 'package:crediahorro/src/features/cliente/cuotas/CuotasClientePage.dart';
 import 'package:crediahorro/src/features/cliente/dashboard/PrestamosClientePage.dart';
 import 'package:crediahorro/src/features/cliente/dashboard/models/prestamos.dart';
+import 'package:crediahorro/src/features/cliente/historial-solicitudes/HistorialSolicitudesPage.dart';
 import 'package:crediahorro/src/features/cliente/prestamos/PrestamosClienteListaPage.dart';
 import 'package:crediahorro/src/features/cliente/solicitud_pago/PagarCuotaPage.dart';
 import 'package:crediahorro/src/features/profile/profile_overview_page.dart';
@@ -40,6 +41,7 @@ class AppRouter {
   static const String cuotasclientes = '/cuotasclientes';
   static const String pagarcuota = '/pagarcuota';
   static const String solicitudpago = '/solicitudpago';
+  static const String historialsolicitud = '/historialsolicitud';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -106,6 +108,10 @@ class AppRouter {
       case solicitudpago:
         return MaterialPageRoute(
           builder: (_) => const SolicitudesPagoAdminPage(),
+        );
+      case historialsolicitud:
+        return MaterialPageRoute(
+          builder: (_) => const HistorialSolicitudesPage(),
         );
       default:
         return MaterialPageRoute(

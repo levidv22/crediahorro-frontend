@@ -53,10 +53,10 @@ class _AppScaffoldUsuarioState extends State<AppScaffoldUsuario> {
         );
         break;
       case 2:
-        Navigator.pushReplacementNamed(context, AppRouter.perfiloverview);
+        Navigator.pushReplacementNamed(context, AppRouter.historialsolicitud);
         break;
       case 3:
-        Navigator.pushReplacementNamed(context, AppRouter.configuracion);
+        Navigator.pushReplacementNamed(context, AppRouter.perfiloverview);
         break;
     }
   }
@@ -129,8 +129,8 @@ class _AppScaffoldUsuarioState extends State<AppScaffoldUsuario> {
                 items: [
                   _buildNavItem(Icons.home_outlined, "Home", 0),
                   _buildNavItem(Icons.attach_money_outlined, "Préstamos", 1),
-                  _buildNavItem(Icons.person_outline, "Perfil", 2),
-                  _buildNavItem(Icons.settings_outlined, "Ajustes", 3),
+                  _buildNavItem(Icons.article_outlined, "Historial", 2),
+                  _buildNavItem(Icons.person_outline, "Perfil", 3),
                 ],
               ),
             ),

@@ -25,7 +25,6 @@ class _AppSidebarState extends State<AppSidebar> {
         Icons.settings_outlined,
         AppRouter.configuracion,
       ),
-      _SidebarItem("Pagos", Icons.money_outlined, AppRouter.solicitudpago),
     ];
 
     return Material(

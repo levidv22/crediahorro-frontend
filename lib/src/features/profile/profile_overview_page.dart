@@ -1,3 +1,4 @@
+import 'package:crediahorro/src/common_widgets/app_scaffold.dart';
 import 'package:crediahorro/src/services/LoanService.dart';
 import 'package:crediahorro/src/services/UsuariosService.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,6 @@ import 'package:crediahorro/src/common_widgets/profile_avatar.dart';
 import 'package:crediahorro/src/routing/app_router.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:crediahorro/src/common_widgets/role_scaffold_builder.dart';
 
 class ProfileOverviewPage extends StatefulWidget {
   const ProfileOverviewPage({super.key});
@@ -93,10 +93,8 @@ class _ProfileOverviewPageState extends State<ProfileOverviewPage> {
 
   @override
   Widget build(BuildContext context) {
-    return buildRoleBasedScaffold(
-      role: _role,
+    return AppScaffold(
       title: "CREDIAHORRO",
-      viewName: "profile",
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -301,6 +299,7 @@ class _ProfileOverviewPageState extends State<ProfileOverviewPage> {
           ],
         ),
       ),
+      initialIndex: 4,
     );
   }
 }

@@ -53,13 +53,13 @@ class _AppScaffoldState extends State<AppScaffold> {
         Navigator.pushReplacementNamed(context, AppRouter.clientes);
         break;
       case 2:
-        Navigator.pushReplacementNamed(context, AppRouter.reportes);
+        Navigator.pushReplacementNamed(context, AppRouter.solicitudpago);
         break;
       case 3:
-        Navigator.pushReplacementNamed(context, AppRouter.perfiloverview);
+        Navigator.pushReplacementNamed(context, AppRouter.reportes);
         break;
       case 4:
-        Navigator.pushReplacementNamed(context, AppRouter.configuracion);
+        Navigator.pushReplacementNamed(context, AppRouter.perfiloverview);
         break;
     }
   }
@@ -137,9 +137,9 @@ class _AppScaffoldState extends State<AppScaffold> {
                 items: [
                   _buildNavItem(Icons.home_outlined, "Home", 0),
                   _buildNavItem(Icons.people_outline, "Clientes", 1),
-                  _buildNavItem(Icons.bar_chart_outlined, "Estadísticas", 2),
-                  _buildNavItem(Icons.person_outline, "Perfil", 3),
-                  _buildNavItem(Icons.settings_outlined, "Ajustes", 4),
+                  _buildNavItem(Icons.attach_money_outlined, "Pagos", 2),
+                  _buildNavItem(Icons.bar_chart_outlined, "Estadísticas", 3),
+                  _buildNavItem(Icons.person_outline, "Perfil", 4),
                 ],
               ),
             ),

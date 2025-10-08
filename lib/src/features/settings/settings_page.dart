@@ -1,10 +1,10 @@
+import 'package:crediahorro/src/common_widgets/app_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:crediahorro/src/services/AuthService.dart';
 import 'package:crediahorro/src/constants/app_colors.dart';
 import 'package:crediahorro/src/routing/app_router.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:crediahorro/src/common_widgets/role_scaffold_builder.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -61,10 +61,8 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
     ];
 
-    return buildRoleBasedScaffold(
-      role: _role,
+    return AppScaffold(
       title: "CREDIAHORRO",
-      viewName: "settings",
       body: ListView.separated(
         padding: const EdgeInsets.all(16),
         itemCount: items.length,

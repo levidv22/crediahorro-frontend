@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:crediahorro/src/services/AuthService.dart';
 
-class SolicitudPagoService {
+class SolicitudPagoAdminService {
   final String baseUrl =
       //"http://localhost:4040/admin-service/admin-solicitudes-pago";
       "https://gateway-production-e6b2.up.railway.app/admin-service/admin-solicitudes-pago";
