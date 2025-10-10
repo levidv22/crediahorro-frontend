@@ -75,6 +75,7 @@ class _HistorialSolicitudesPageState extends State<HistorialSolicitudesPage> {
           },
         ),
       ),
+      initialIndex: 2,
     );
   }
 

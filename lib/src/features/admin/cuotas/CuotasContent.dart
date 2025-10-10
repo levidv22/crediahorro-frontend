@@ -24,19 +24,32 @@ class CuotasContent extends StatelessWidget {
     }
   }
 
-  Color _estadoColor(String? estado) {
-    switch (estado) {
+  /// 🔹 Colores según estado o tipoPago
+  Color _estadoColor(String? estado, String? tipoPago) {
+    final valor = (tipoPago?.isNotEmpty ?? false) ? tipoPago : estado;
+    switch (valor) {
       case "PAGADA":
+      case "Pagó Completo":
         return Colors.green;
       case "PENDIENTE":
         return Colors.orange;
       case "ADELANTADO":
         return Colors.blue;
+      case "PAGO_INCOMPLETO":
+        return Colors.blueGrey;
       case "NO_PAGADA":
-        return Colors.red;
+        return Colors.redAccent;
       default:
         return Colors.grey;
     }
+  }
+
+  /// 🔹 Texto visible según estado
+  String _estadoVisible(String? estado, String? tipoPago) {
+    if (tipoPago == "PAGO_INCOMPLETO") return "PAGO INCOMPLETO";
+    if (tipoPago == "NO_PAGADA") return "NO PAGADA";
+    if (tipoPago == "Pagó Completo" || estado == "PAGADA") return "PAGADA";
+    return estado ?? "N/A";
   }
 
   bool _esPagarHabilitado(List<Cuota> cuotas, int i) {
@@ -49,6 +62,7 @@ class CuotasContent extends StatelessWidget {
         anterior.tipoPago == "PAGO_INCOMPLETO";
   }
 
+  /// 🔹 Pago parcial
   void _mostrarDialogoPagoParcial(BuildContext context, Cuota cuota) async {
     final controller = TextEditingController();
     final monto = await showDialog<double>(
@@ -146,6 +160,57 @@ class CuotasContent extends StatelessWidget {
     }
   }
 
+  /// 🔹 Confirmaciones (pagar / no pagar)
+  Future<bool> _mostrarConfirmacion(
+    BuildContext context,
+    String titulo,
+    String mensaje,
+    Color color,
+  ) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (_) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: Row(
+              children: [
+                Icon(Icons.warning_amber_rounded, color: color, size: 30),
+                const SizedBox(width: 10),
+                Text(
+                  titulo,
+                  style: TextStyle(fontWeight: FontWeight.bold, color: color),
+                ),
+              ],
+            ),
+            content: Text(mensaje, style: const TextStyle(fontSize: 15)),
+            actions: [
+              TextButton(
+                child: const Text(
+                  "Cancelar",
+                  style: TextStyle(color: Colors.grey),
+                ),
+                onPressed: () => Navigator.pop(context, false),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: color,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text(
+                  "Confirmar",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<CuotasBloc, CuotasState>(
@@ -156,8 +221,6 @@ class CuotasContent extends StatelessWidget {
           return Center(child: Text(state.message));
         } else if (state is CuotasLoaded) {
           final cuotas = state.data.cuotas;
-
-          // Calcular totales
           final totalAPagar = cuotas.fold(0.0, (s, c) => s + c.montoCuota);
           final totalPagado = cuotas
               .where((c) => c.estado == "PAGADA")
@@ -170,12 +233,12 @@ class CuotasContent extends StatelessWidget {
               .length;
 
           return RefreshIndicator(
-            onRefresh: () async {
-              context.read<CuotasBloc>().add(RefreshCuotas(prestamoId));
-            },
+            onRefresh: () async =>
+                context.read<CuotasBloc>().add(RefreshCuotas(prestamoId)),
             child: ListView(
               padding: const EdgeInsets.all(12),
               children: [
+                /// 🔹 Card Superior
                 Card(
                   elevation: 4,
                   shape: RoundedRectangleBorder(
@@ -189,97 +252,86 @@ class CuotasContent extends StatelessWidget {
                           Colors.indigo.shade50,
                           Colors.indigo.shade100.withOpacity(0.3),
                         ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          // Ícono decorativo a la izquierda
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.indigo.shade100,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.payments_outlined,
-                              color: Colors.indigo,
-                              size: 28,
-                            ),
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.indigo.shade100,
+                            shape: BoxShape.circle,
                           ),
-                          const SizedBox(width: 16),
-
-                          // Texto principal
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Tipo de Cuota",
-                                  style: TextStyle(
-                                    color: Colors.indigo.shade700,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  state.data.tipoCuota ?? "-",
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.schedule_outlined,
-                                      color: Colors.grey,
-                                      size: 18,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      "Cuotas pendientes: $cuotasPendientes",
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.black54,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                          child: const Icon(
+                            Icons.payments_outlined,
+                            color: Colors.indigo,
+                            size: 28,
                           ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Tipo de Cuota",
+                                style: TextStyle(
+                                  color: Colors.indigo.shade700,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                state.data.tipoCuota ?? "-",
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                "Cuotas pendientes: $cuotasPendientes",
+                                style: const TextStyle(color: Colors.black54),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
+
+                const SizedBox(height: 12),
+
+                /// 🔹 Lista de cuotas
                 ...cuotas.asMap().entries.map((entry) {
                   final i = entry.key;
                   final c = entry.value;
                   return Container(
                     margin: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 5,
+                      vertical: 6,
+                      horizontal: 5,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 233, 241, 246),
-                      borderRadius: BorderRadius.circular(12),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.indigo.withOpacity(0.08),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
                     ),
                     child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
                       leading: CircleAvatar(
-                        radius: 22,
-                        backgroundColor: _estadoColor(c.estado),
+                        radius: 24,
+                        backgroundColor: _estadoColor(c.estado, c.tipoPago),
                         child: const Icon(
                           Icons.event_note,
                           color: Colors.white,
@@ -289,103 +341,39 @@ class CuotasContent extends StatelessWidget {
                         _formatCurrency(c.montoCuota),
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 15,
+                          fontSize: 16,
                         ),
                       ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Fecha de Pago: ${_formatDate(c.fechaPago)}"),
-                          Text("Fecha Pagada: ${_formatDate(c.fechaPagada)}"),
-                          Text(
-                            "Estado: ${c.estado ?? "N/A"}",
-                            style: TextStyle(
-                              color: _estadoColor(c.estado),
-                              fontWeight: FontWeight.w600,
+                      subtitle: Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Fecha de Pago: ${_formatDate(c.fechaPago)}"),
+                            Text("Fecha Pagada: ${_formatDate(c.fechaPagada)}"),
+                            Text(
+                              _estadoVisible(c.estado, c.tipoPago),
+                              style: TextStyle(
+                                color: _estadoColor(c.estado, c.tipoPago),
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       trailing: PopupMenuButton<String>(
-                        color: const Color(
-                          0xFFf1f5f9,
-                        ), // Fondo gris-azulado suave
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        elevation: 8,
+                        color: Colors.white,
                         onSelected: (value) async {
-                          Future<bool> _mostrarConfirmacion(
-                            BuildContext context,
-                            String titulo,
-                            String mensaje,
-                            Color color,
-                          ) async {
-                            return await showDialog<bool>(
-                                  context: context,
-                                  builder: (_) => AlertDialog(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    title: Row(
-                                      children: [
-                                        Icon(
-                                          Icons.warning_amber_rounded,
-                                          color: color,
-                                          size: 30,
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Text(
-                                          titulo,
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: color,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    content: Text(
-                                      mensaje,
-                                      style: const TextStyle(fontSize: 15),
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        child: const Text(
-                                          "Cancelar",
-                                          style: TextStyle(color: Colors.grey),
-                                        ),
-                                        onPressed: () =>
-                                            Navigator.pop(context, false),
-                                      ),
-                                      ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: color,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              10,
-                                            ),
-                                          ),
-                                        ),
-                                        onPressed: () =>
-                                            Navigator.pop(context, true),
-                                        child: const Text(
-                                          "Confirmar",
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ) ??
-                                false;
-                          }
-
                           switch (value) {
                             case "pagar":
                               if (_esPagarHabilitado(cuotas, i)) {
                                 final confirmar = await _mostrarConfirmacion(
                                   context,
                                   "Confirmar Pago",
-                                  "¿Estás seguro de que deseas marcar esta cuota como pagada?",
+                                  "¿Deseas marcar esta cuota como pagada?",
                                   Colors.green,
                                 );
                                 if (confirmar) {
@@ -430,91 +418,46 @@ class CuotasContent extends StatelessWidget {
                               break;
                           }
                         },
-
                         itemBuilder: (context) => [
                           if (c.estado == "PENDIENTE") ...[
-                            PopupMenuItem(
+                            const PopupMenuItem(
                               value: "pagar",
                               child: Row(
                                 children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.green.withOpacity(0.1),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    padding: const EdgeInsets.all(6),
-                                    child: const Icon(
-                                      Icons.payment,
-                                      color: Colors.green,
-                                      size: 18,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  const Text("Pagar"),
+                                  Icon(Icons.check_circle, color: Colors.green),
+                                  SizedBox(width: 8),
+                                  Text("Pago Completo"),
                                 ],
                               ),
                             ),
-                            PopupMenuItem(
-                              value: "nopagar",
-                              child: Row(
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.red.withOpacity(0.1),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    padding: const EdgeInsets.all(6),
-                                    child: const Icon(
-                                      Icons.cancel,
-                                      color: Colors.red,
-                                      size: 18,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  const Text("No pagar"),
-                                ],
-                              ),
-                            ),
-                            PopupMenuItem(
+                            const PopupMenuItem(
                               value: "parcial",
                               child: Row(
                                 children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue.withOpacity(0.1),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    padding: const EdgeInsets.all(6),
-                                    child: const Icon(
-                                      Icons.money_off,
-                                      color: Colors.blue,
-                                      size: 18,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  const Text("Pago Parcial"),
+                                  Icon(Icons.payments, color: Colors.blue),
+                                  SizedBox(width: 8),
+                                  Text("Pago Parcial"),
+                                ],
+                              ),
+                            ),
+                            const PopupMenuItem(
+                              value: "nopagar",
+                              child: Row(
+                                children: [
+                                  Icon(Icons.cancel, color: Colors.redAccent),
+                                  SizedBox(width: 8),
+                                  Text("No pagar"),
                                 ],
                               ),
                             ),
                           ] else
-                            PopupMenuItem(
+                            const PopupMenuItem(
                               value: "info",
                               child: Row(
                                 children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.withOpacity(0.1),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    padding: const EdgeInsets.all(6),
-                                    child: const Icon(
-                                      Icons.info,
-                                      color: Colors.grey,
-                                      size: 18,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  const Text("Esta cuota ya fue gestionada"),
+                                  Icon(Icons.info_outline, color: Colors.grey),
+                                  SizedBox(width: 8),
+                                  Text("Cuota ya gestionada"),
                                 ],
                               ),
                             ),
@@ -523,7 +466,10 @@ class CuotasContent extends StatelessWidget {
                     ),
                   );
                 }),
+
                 const Divider(),
+
+                /// 🔹 Card inferior (resumen)
                 Card(
                   elevation: 4,
                   shape: RoundedRectangleBorder(
@@ -537,8 +483,6 @@ class CuotasContent extends StatelessWidget {
                           Colors.indigo.shade50,
                           Colors.indigo.shade100.withOpacity(0.3),
                         ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -572,40 +516,25 @@ class CuotasContent extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.8),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildResumenRow(
-                                icon: Icons.attach_money_outlined,
-                                label: "Total a pagar:",
-                                value: _formatCurrency(totalAPagar),
-                                color: Colors.indigo,
-                              ),
-                              const SizedBox(height: 8),
-                              _buildResumenRow(
-                                icon: Icons.payments_outlined,
-                                label: "Total pagado:",
-                                value: _formatCurrency(totalPagado),
-                                color: Colors.green,
-                              ),
-                              const SizedBox(height: 8),
-                              _buildResumenRow(
-                                icon: Icons.warning_amber_outlined,
-                                label: "Falta pagar:",
-                                value: _formatCurrency(faltaPagar),
-                                color: Colors.redAccent,
-                              ),
-                            ],
-                          ),
+                        _buildResumenRow(
+                          Icons.attach_money_outlined,
+                          "Total a pagar:",
+                          _formatCurrency(totalAPagar),
+                          Colors.indigo,
+                        ),
+                        const SizedBox(height: 8),
+                        _buildResumenRow(
+                          Icons.payments_outlined,
+                          "Total pagado:",
+                          _formatCurrency(totalPagado),
+                          Colors.green,
+                        ),
+                        const SizedBox(height: 8),
+                        _buildResumenRow(
+                          Icons.warning_amber_outlined,
+                          "Falta pagar:",
+                          _formatCurrency(faltaPagar),
+                          Colors.redAccent,
                         ),
                       ],
                     ),
@@ -620,12 +549,12 @@ class CuotasContent extends StatelessWidget {
     );
   }
 
-  Widget _buildResumenRow({
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
+  Widget _buildResumenRow(
+    IconData icon,
+    String label,
+    String value,
+    Color color,
+  ) {
     return Row(
       children: [
         Icon(icon, color: color, size: 22),

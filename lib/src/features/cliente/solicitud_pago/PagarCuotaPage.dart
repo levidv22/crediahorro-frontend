@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:crediahorro/src/common_widgets/app_scaffold_usuario.dart';
 import 'package:crediahorro/src/features/cliente/dashboard/models/prestamos.dart';
 import 'package:crediahorro/src/services/SolicitudesPagoClienteService.dart';
+import 'package:intl/intl.dart';
 
 class PagarCuotaPage extends StatefulWidget {
   final Cuota cuota;
@@ -24,6 +25,16 @@ class _PagarCuotaPageState extends State<PagarCuotaPage> {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery);
     if (picked != null) setState(() => _imagenComprobante = File(picked.path));
+  }
+
+  String _formatearFecha(String? fecha) {
+    if (fecha == null || fecha.isEmpty) return '-';
+    try {
+      final DateTime fechaParseada = DateTime.parse(fecha);
+      return DateFormat('dd MMM yyyy, hh:mm a', 'es_ES').format(fechaParseada);
+    } catch (e) {
+      return fecha;
+    }
   }
 
   Future<void> _enviarPago() async {
@@ -74,49 +85,43 @@ class _PagarCuotaPageState extends State<PagarCuotaPage> {
       title: "CREDIAHORRO",
       body: Container(
         width: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.white, Colors.white],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            colors: [Color(0xFFE9F4FF), Colors.white],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
         ),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(22),
+          padding: const EdgeInsets.all(20),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 🧾 Card de información del pago
               Card(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(18),
-                  side: BorderSide(
-                    color: Colors.lightBlue.shade200,
-                    width: 1.5,
-                  ),
                 ),
-                elevation: 6,
-                shadowColor: Colors.cyan.shade100,
+                elevation: 8,
+                shadowColor: Colors.blue.withOpacity(0.2),
                 color: Colors.white,
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment:
-                        CrossAxisAlignment.center, // 🔹 Centra horizontalmente
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment
-                            .center, // 🔹 Centra el icono y el título
-                        children: const [
-                          Icon(Icons.receipt_long, color: Colors.blueAccent),
+                      const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.receipt_long_rounded,
+                            color: Color(0xFF1565C0),
+                          ),
                           SizedBox(width: 8),
                           Text(
                             "Detalles de la Cuota",
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: Colors.blueAccent,
+                              color: Color(0xFF1565C0),
                             ),
                           ),
                         ],
@@ -124,18 +129,19 @@ class _PagarCuotaPageState extends State<PagarCuotaPage> {
                       const SizedBox(height: 15),
                       Text(
                         "💰 Monto a pagar: S/ ${cuota.montoCuota}",
-                        textAlign: TextAlign.center, // 🔹 Centra el texto
+                        textAlign: TextAlign.center,
                         style: const TextStyle(
                           fontWeight: FontWeight.w700,
-                          fontSize: 17,
+                          fontSize: 18,
+                          color: Colors.black87,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        "📅 Fecha límite: ${cuota.fechaPago}",
-                        textAlign: TextAlign.center, // 🔹 Centra el texto
-                        style: TextStyle(
-                          color: Colors.grey.shade700,
+                        "📅 Fecha límite: ${_formatearFecha(cuota.fechaPago)}",
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.black54,
                           fontSize: 15,
                         ),
                       ),
@@ -144,137 +150,119 @@ class _PagarCuotaPageState extends State<PagarCuotaPage> {
                 ),
               ),
 
-              const SizedBox(height: 28),
+              const SizedBox(height: 30),
 
               // 💳 Card QR y número Yape
-              Center(
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
-                    side: BorderSide(
-                      color: Colors.lightBlue.shade200,
-                      width: 1.5,
-                    ),
-                  ),
-                  color: Colors.blue.shade50,
-                  elevation: 6,
-                  shadowColor: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(22),
-                    child: Column(
-                      mainAxisSize:
-                          MainAxisSize.min, // 🔹 Ajusta el tamaño al contenido
-                      crossAxisAlignment: CrossAxisAlignment
-                          .center, // 🔹 Centra el contenido interno
-                      children: [
-                        ClipRRect(
+              Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                elevation: 10,
+                shadowColor: Colors.blueAccent.withOpacity(0.2),
+                color: Colors.white,
+                child: Padding(
+                  padding: const EdgeInsets.all(22),
+                  child: Column(
+                    children: [
+                      Center(
+                        child: ClipRRect(
                           borderRadius: BorderRadius.circular(16),
                           child: Image.asset(
                             "assets/img/qr_yape.jpeg",
-                            height:
-                                260, // 📸 Imagen un poco más grande para destacar
+                            height: 250,
                             fit: BoxFit.cover,
                           ),
                         ),
-                        const SizedBox(height: 18),
-                        const Text(
-                          "Número Yape",
+                      ),
+                      const SizedBox(height: 20),
+                      const Text(
+                        "Número Yape",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1565C0),
+                          fontSize: 17,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Color(0xFF1565C0),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Text(
+                          "928 581 983",
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blueAccent,
-                            fontSize: 17,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: Colors.white, width: 1),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.blueAccent.withOpacity(0.1),
-                                blurRadius: 6,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: const Text(
-                            "928 581 983",
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.black87,
-                              letterSpacing: 1.0,
-                            ),
+                            letterSpacing: 1.0,
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 35),
 
               // ⚙️ Tipo de pago
-              const Text(
-                "Tipo de pago",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: Colors.blueAccent,
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Tipo de pago",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.blue.shade700,
+                  ),
                 ),
               ),
-              const SizedBox(height: 10),
-              DecoratedBox(
+              const SizedBox(height: 12),
+
+              Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.lightBlue.shade200,
-                    width: 1.5,
-                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.blue.shade100, width: 1.3),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.blue.shade100.withOpacity(0.2),
-                      blurRadius: 5,
+                      color: Colors.blue.shade100.withOpacity(0.25),
+                      blurRadius: 8,
                       offset: const Offset(0, 3),
                     ),
                   ],
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: DropdownButton<String>(
-                    value: _tipoSeleccionado,
-                    isExpanded: true,
-                    underline: const SizedBox(),
-                    items: const [
-                      DropdownMenuItem(
-                        value: "PAGO_COMPLETO",
-                        child: Text("Pago completo"),
-                      ),
-                      DropdownMenuItem(
-                        value: "PAGO_PARCIAL",
-                        child: Text("Pago parcial"),
-                      ),
-                      DropdownMenuItem(
-                        value: "NO_PAGAR",
-                        child: Text("No pagar"),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      setState(() => _tipoSeleccionado = value!);
-                    },
-                  ),
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: DropdownButton<String>(
+                  value: _tipoSeleccionado,
+                  isExpanded: true,
+                  underline: const SizedBox(),
+                  items: const [
+                    DropdownMenuItem(
+                      value: "PAGO_COMPLETO",
+                      child: Text("Pago completo"),
+                    ),
+                    DropdownMenuItem(
+                      value: "PAGO_PARCIAL",
+                      child: Text("Pago parcial"),
+                    ),
+                    DropdownMenuItem(
+                      value: "NO_PAGAR",
+                      child: Text("No pagar"),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() => _tipoSeleccionado = value!);
+                  },
                 ),
               ),
-              const SizedBox(height: 20),
+
+              const SizedBox(height: 25),
 
               // 💰 Campo monto si es parcial
               if (_tipoSeleccionado == "PAGO_PARCIAL")
@@ -314,10 +302,10 @@ class _PagarCuotaPageState extends State<PagarCuotaPage> {
                 _imagenComprobante == null
                     ? OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                           side: BorderSide(
-                            color: Colors.blue.shade300,
-                            width: 1.5,
+                            color: Colors.blue.shade600,
+                            width: 1.3,
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -326,11 +314,14 @@ class _PagarCuotaPageState extends State<PagarCuotaPage> {
                         onPressed: _seleccionarImagen,
                         icon: const Icon(
                           Icons.upload_rounded,
-                          color: Colors.blueAccent,
+                          color: Color(0xFF1565C0),
                         ),
                         label: const Text(
                           "Subir comprobante de pago",
-                          style: TextStyle(color: Colors.blueAccent),
+                          style: TextStyle(
+                            color: Color(0xFF1565C0),
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       )
                     : Column(
@@ -339,21 +330,24 @@ class _PagarCuotaPageState extends State<PagarCuotaPage> {
                             borderRadius: BorderRadius.circular(15),
                             child: Image.file(
                               _imagenComprobante!,
-                              height: 240, // 📸 Imagen más grande
+                              height: 250,
                               fit: BoxFit.cover,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 10),
                           TextButton.icon(
                             onPressed: _seleccionarImagen,
                             icon: const Icon(
                               Icons.edit,
                               size: 18,
-                              color: Colors.blueAccent,
+                              color: Color(0xFF1565C0),
                             ),
                             label: const Text(
                               "Cambiar imagen",
-                              style: TextStyle(color: Colors.blueAccent),
+                              style: TextStyle(
+                                color: Color(0xFF1565C0),
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
@@ -370,7 +364,9 @@ class _PagarCuotaPageState extends State<PagarCuotaPage> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    backgroundColor: Colors.blueAccent.shade700,
+                    backgroundColor: const Color(0xFF1565C0),
+                    elevation: 4,
+                    shadowColor: Colors.blueAccent.withOpacity(0.3),
                   ),
                   icon: _enviando
                       ? const SizedBox(
@@ -389,6 +385,7 @@ class _PagarCuotaPageState extends State<PagarCuotaPage> {
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 17,
+                      letterSpacing: 0.5,
                     ),
                   ),
                 ),
